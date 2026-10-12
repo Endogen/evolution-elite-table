@@ -1,0 +1,15 @@
+# Build on the NVIDIA Linux host with the pinned autoresearch checkout as context:
+# docker build -f /path/to/evolution-elite-table/Dockerfile.autoresearch -t eet-autoresearch:local /path/to/autoresearch
+FROM python:3.11-slim-bookworm
+RUN apt-get update && apt-get install -y --no-install-recommends build-essential git ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
+RUN pip install --no-cache-dir uv==0.13.0
+WORKDIR /opt/autoresearch
+COPY pyproject.toml uv.lock README.md ./
+RUN uv sync --frozen --no-dev
+ENV PATH="/opt/autoresearch/.venv/bin:$PATH" \
+    PYTHONDONTWRITEBYTECODE=1 \
+    TRITON_CACHE_DIR=/tmp/triton \
+    TORCHINDUCTOR_CACHE_DIR=/tmp/torchinductor
+WORKDIR /work
+CMD ["python", "/bench/_eet_worker.py"]

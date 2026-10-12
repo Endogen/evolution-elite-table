@@ -1,0 +1,37 @@
+{
+  "benchmark": "/absolute/path/to/autoresearch",
+  "files": ["train.py", "prepare.py", "pyproject.toml", "uv.lock"],
+  "mode": "remix",
+  "seed": 0,
+  "evaluations": 30,
+  "max_proposals": 120,
+  "population": 10,
+  "elite_size": 5,
+  "proposal_workers": 3,
+  "max_repairs": 2,
+  "diversity_weight": 0.0,
+  "training_seconds": 300,
+  "training_tolerance_seconds": 30,
+  "timeout_seconds": 600,
+  "max_memory_mb": null,
+  "adapter": "autoresearch",
+  "backend": "docker",
+  "image": "eet-autoresearch:local",
+  "gpu": "0",
+  "command": ["python", "/bench/_eet_worker.py"],
+  "mounts": [
+    {"source": "~/.cache/autoresearch", "target": "/root/.cache/autoresearch"},
+    {"source": "~/.cache/eet-huggingface", "target": "/root/.cache/huggingface"}
+  ],
+  "heldout_command": [],
+  "heldout_mounts": [],
+  "provider": {
+    "kind": "openrouter",
+    "model": "REPLACE_WITH_MODEL_ID",
+    "api_key_env": "OPENROUTER_API_KEY",
+    "temperature": 0.8,
+    "max_tokens": 16000,
+    "timeout_seconds": 180
+  },
+  "context": "Improve the GPT architecture, optimizer or batching in train.py under the fixed 300-second training budget. Preserve the full final-eval suffix and the original timing and data protocol. Only installed dependencies may be used. Lower val_bpb is better."
+}

@@ -1,0 +1,17 @@
+{
+  "benchmark": "../examples/tiny_lm",
+  "files": ["train.py", "benchmark.py"],
+  "mode": "remix",
+  "evaluations": 16,
+  "population": 5,
+  "elite_size": 4,
+  "training_seconds": 0,
+  "timeout_seconds": 30,
+  "training_tolerance_seconds": 30,
+  "adapter": "generic",
+  "backend": "local",
+  "command": ["python3", "train.py"],
+  "heldout_command": ["python3", "train.py", "--heldout"],
+  "provider": {"kind": "demo"},
+  "context": "Optimize a small byte n-gram language model. This is a CPU demonstration with scripted proposals."
+}
