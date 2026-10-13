@@ -86,6 +86,27 @@ class RunnerTests(unittest.TestCase):
         self.runner.evaluate(self.row(source))
         self.assertEqual((self.engine.store.root / "benchmark/train.py").read_text(), "pass\n")
 
+    def test_docker_log_mount_allows_capability_dropped_root(self):
+        self.config.backend = "docker"
+        self.engine.state["provenance"]["image_id"] = "sha256:pinned"
+
+        def inspect_log_permissions(argv, **kwargs):
+            mount = next(arg for arg in argv if arg.endswith(",dst=/logs"))
+            folder = Path(mount.removeprefix("type=bind,src=").removesuffix(",dst=/logs"))
+            self.assertIn("--cap-drop=ALL", argv)
+            self.assertEqual(folder.parent.stat().st_mode & 0o777, 0o700)
+            # UID 0 without DAC_OVERRIDE needs ordinary write/traverse bits
+            # when the host user, not container root, owns the bind mount.
+            self.assertEqual(folder.stat().st_mode & 0o003, 0o003)
+            Path(kwargs["log"]).write_text("val_bpb: 1\ntraining_seconds: 0\npeak_vram_mb: 0\n")
+            return 0, "", "", 0.01, False
+
+        with (
+            patch("evolution_elite_table.runner.run_process", side_effect=inspect_log_permissions),
+            patch("evolution_elite_table.runner.subprocess.run"),
+        ):
+            self.runner.evaluate(self.row("pass"))
+
     def test_training_log_survives_a_container_timeout(self):
         self.config.backend = "docker"
         self.engine.state["provenance"]["image_id"] = "sha256:pinned"

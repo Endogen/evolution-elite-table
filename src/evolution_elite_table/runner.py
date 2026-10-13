@@ -172,6 +172,9 @@ class Runner:
                 candidate = work / "train.py"
                 logs = work / "logs"
                 logs.mkdir()
+                # Container root has no DAC_OVERRIDE; grant write/traverse only
+                # on this log mount. The surrounding temporary dir stays 0700.
+                logs.chmod(0o733)
                 # Recreate from the checksum-verified checkpoint, never trust an edited artifact.
                 candidate.write_text(row["source"])
                 argv = [
